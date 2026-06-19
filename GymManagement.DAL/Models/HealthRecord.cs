@@ -14,5 +14,10 @@ namespace GymManagement.DAL.Models
         public string? Note { get; set; }
 
         //updatedAt of BaseEntity => LastUpdated
+
+        #region Relationships
+        public Member Member { get; set; } = default!;
+        public int MemberId { get; set; }  // FK
+        #endregion
     }
 }
