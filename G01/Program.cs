@@ -1,4 +1,6 @@
 using G01.Context;
+using GymManagement.BLL.Services.Classes;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +17,9 @@ namespace G01
             builder.Services.AddControllersWithViews();
 
             // Register DI
-            builder.Services.AddScoped<IPlanRepository, PlanRepository>();  // Dependency Injection
+            // Dependency Injection
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<IMemberService, MemberService>();
             // EF core will create object from DbContext Automatic when we request it from the container 
             builder.Services.AddDbContext<GymDbContext>(options =>
             {

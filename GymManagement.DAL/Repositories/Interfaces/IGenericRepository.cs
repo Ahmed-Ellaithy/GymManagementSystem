@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,5 +20,9 @@ namespace GymManagement.DAL.Repositories.Interfaces
         Task<int> DeleteAsync(TEntity entity);
         // Get all
         Task<IEnumerable<TEntity>> GetAllAsync(bool tracking = false, CancellationToken ct = default);
+
+
+        Task<bool> AnyAsync(Expression<Func<TEntity , bool>> predict , CancellationToken ct = default);
+        
     }
 }

@@ -1,0 +1,83 @@
+﻿using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.ViewModels.MemberViewModels;
+using GymManagement.DAL.Models;
+using GymManagement.DAL.Repositories.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GymManagement.BLL.Services.Classes
+{
+    public class MemberService : IMemberService
+    {
+        // Database connection 
+        private readonly IGenericRepository<Member> _memberRepo;
+        public MemberService(IGenericRepository<Member> memberRepo)
+        {
+            _memberRepo = memberRepo;
+        }
+
+        public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
+        {
+            // email exist or not 
+            var emailExist = await _memberRepo.AnyAsync(X => X.Email == model.Email);
+            // phone exist or not
+            var phoneExist = await _memberRepo.AnyAsync(X => X.Phone == model.Phone);
+
+            if (emailExist || phoneExist) return false;
+            // Add member to database
+            var member = new Member()
+            {
+                Name = model.Name,
+                Email = model.Email,
+                Phone = model.Phone,
+                Gender = model.Gender,
+                DateOfBirth = model.DateOfBirth,
+                Address = new Address()
+                {
+                    BuildingNumber = model.BuildingNumber,
+                    City = model.City,
+                    Street = model.Street
+                },
+                HealthRecord = new HealthRecord()
+                {
+                    BloodType = model.HealthRecordViewModel.BloodType,
+                    Height = model.HealthRecordViewModel.Height,
+                    Weight = model.HealthRecordViewModel.Weight,
+                    Note = model.HealthRecordViewModel.Note
+                }
+            };
+            var result = await _memberRepo.AddAsync(member);
+            return result > 0;
+
+        }
+
+        public async Task<IEnumerable<MemberViewModel>> GetAllAsync(CancellationToken ct = default)
+        {
+            var members = await _memberRepo.GetAllAsync(ct: ct);
+            // members come from Database
+            if (!members.Any()) return [];
+            //member => view model
+            List<MemberViewModel> memberVM = new List<MemberViewModel>();
+            foreach (var member in members)
+            {
+                //Data come from database and i need to send it to view model
+                // manual mapping
+                var memberViewModel = new MemberViewModel()
+                {
+                    Id = member.Id,
+                    Photo = member.Photo,
+                    Name = member.Name,
+                    Email = member.Email,
+                    Phone = member.Phone,
+                    Gender = member.Gender.ToString()
+                };
+                memberVM.Add(memberViewModel);
+            }
+            return memberVM;
+        }
+    }
+}

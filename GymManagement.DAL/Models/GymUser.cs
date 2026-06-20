@@ -17,7 +17,7 @@ namespace GymManagement.DAL.Models
         public Gender Gender { get; set; }
 
         // address
-        public Address Address { get; set; }
+        public Address Address { get; set; } 
     }
     [Owned]
     public class Address
