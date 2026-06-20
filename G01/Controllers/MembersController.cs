@@ -40,7 +40,16 @@ namespace G01.PL.Controllers
 
 
         // Get :: BaseUrl/Members/HealthReacordDetails/{Id} => get data of a specific member with health record
-
+        public async Task<IActionResult> HealthRecordDetails(int id , CancellationToken ct) 
+        { 
+            var record = await _memService.GetMemberHealthRecord(id, ct);
+            if(record == null)
+            {
+                TempData["ErrorMessage"] = "No Healt Record Found !";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(record);
+        }
         #endregion
 
         #region Create Members
