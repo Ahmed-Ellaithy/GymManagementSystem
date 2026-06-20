@@ -1,4 +1,5 @@
 ﻿using G01.Context;
+using G01.Models;
 using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +11,8 @@ namespace G01.Controllers
     public class PlanController : Controller
     {
 
-        private readonly IPlanRepository _planRepository ;
-        public PlanController(IPlanRepository planRepository)
+        private readonly IGenericRepository<Plan> _planRepository ;
+        public PlanController(IGenericRepository<Plan> planRepository)
         {
             _planRepository = planRepository;
 
