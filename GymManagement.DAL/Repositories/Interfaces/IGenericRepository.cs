@@ -13,11 +13,11 @@ namespace GymManagement.DAL.Repositories.Interfaces
         // Get by id
         Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default);
         // Add
-        Task<int> AddAsync(TEntity entity);
+        void AddAsync(TEntity entity);
         // Update
-        Task<int> UpdateAsync(TEntity entity);
+        void UpdateAsync(TEntity entity);
         // Delete
-        Task<int> DeleteAsync(TEntity entity);
+        void DeleteAsync(TEntity entity);
         // Get all
         Task<IEnumerable<TEntity>> GetAllAsync(bool tracking = false, CancellationToken ct = default);
 

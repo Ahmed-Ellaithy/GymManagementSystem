@@ -20,6 +20,8 @@ namespace G01
             // Dependency Injection
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IMemberService, MemberService>();
+
+            builder.Services.AddScoped<IUnitOfWork , UnitOfWork>();
             // EF core will create object from DbContext Automatic when we request it from the container 
             builder.Services.AddDbContext<GymDbContext>(options =>
             {
