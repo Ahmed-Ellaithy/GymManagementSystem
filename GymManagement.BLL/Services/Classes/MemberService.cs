@@ -20,16 +20,18 @@ namespace GymManagement.BLL.Services.Classes
         private readonly IGenericRepository<Membership> _membershipRepo;
         private readonly IGenericRepository<Plan> _planRepo;
         private readonly IGenericRepository<HealthRecord> _healthRecordRepo;
-
+        private readonly IGenericRepository<Booking> _bookingRepo;
         public MemberService(IGenericRepository<Member> memberRepo,
                                IGenericRepository<Membership> membershipRepo,
                                IGenericRepository<Plan> planRepo,
-                               IGenericRepository<HealthRecord> healthRecordRepo)
+                               IGenericRepository<HealthRecord> healthRecordRepo,
+                               IGenericRepository<Booking> bookingRepo)
         {
             _memberRepo = memberRepo;
             _membershipRepo = membershipRepo;
             _planRepo = planRepo;
             _healthRecordRepo = healthRecordRepo;
+            _bookingRepo = bookingRepo;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -63,6 +65,18 @@ namespace GymManagement.BLL.Services.Classes
                 }
             };
             var result = await _memberRepo.AddAsync(member);
+            return result > 0;
+
+        }
+
+        public async Task<bool> DeleteMemberAsync(int memberId, CancellationToken ct = default)
+        {
+            var member = await _memberRepo.GetByIdAsync(memberId, ct);
+            if (member is null ) return false;
+            // if member has active booking
+            var HasActiveBooking = await _bookingRepo.AnyAsync(B => B.MemberId == memberId && B.Session.StartDate > DateTime.Now); // Exception
+            if (HasActiveBooking ) return false;
+            var result = await _memberRepo.DeleteAsync(member);
             return result > 0;
 
         }
@@ -138,6 +152,45 @@ namespace GymManagement.BLL.Services.Classes
                     Note = record.Note
                 };
            
+
+        }
+
+        public async Task<MemberToUpdateViewModel> GetMemberToUpdateAsync(int memberId, CancellationToken ct = default)
+        {
+            var member = await _memberRepo.GetByIdAsync(memberId,ct);
+            if (member is null) return null;
+            else
+                return new MemberToUpdateViewModel()
+                {
+                    Name = member.Name,
+                    Phone = member.Phone,
+                    Email = member.Email,
+                    City = member.Address.City,
+                    BuildingNumber = member.Address.BuildingNumber,
+                    Street = member.Address.Street,
+                    Photo = member.Photo
+                };
+                    
+                    
+        }
+
+        public async Task<bool> UpdateMemberAsync(int id, MemberToUpdateViewModel model, CancellationToken ct = default)
+        {
+            // get member
+            var member = await _memberRepo.GetByIdAsync(id, ct);
+            // check if any other user has same phone or email
+            var EmailExist = await _memberRepo.AnyAsync(M => M.Email == model.Email && M.Id != id);
+            var PhoneExist = await _memberRepo.AnyAsync(M => M.Phone == model.Phone && M.Id != id);
+            if(EmailExist || PhoneExist) return false;
+            member.Phone = model.Phone;
+            member.Email = model.Email;
+            member.Address.City = model.City;
+            member.Address.Street = model.Street;
+            member.Address.BuildingNumber = model.BuildingNumber;
+            member.UpdatedAt = DateTime.Now;
+
+            var result = await _memberRepo.UpdateAsync(member);
+            return result > 0;
 
         }
     }
