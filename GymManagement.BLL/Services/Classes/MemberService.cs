@@ -1,7 +1,9 @@
-﻿using GymManagement.BLL.Services.Interfaces;
+﻿using G01.Models;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.DAL.Models;
 using GymManagement.DAL.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,9 +17,15 @@ namespace GymManagement.BLL.Services.Classes
     {
         // Database connection 
         private readonly IGenericRepository<Member> _memberRepo;
-        public MemberService(IGenericRepository<Member> memberRepo)
+        private readonly IGenericRepository<Membership> _membershipRepo;
+        private readonly IGenericRepository<Plan> _planRepo;
+        public MemberService(IGenericRepository<Member> memberRepo,
+                               IGenericRepository<Membership> membershipRepo,
+                               IGenericRepository<Plan> planRepo)
         {
             _memberRepo = memberRepo;
+            _membershipRepo = membershipRepo;
+            _planRepo = planRepo;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -78,6 +86,39 @@ namespace GymManagement.BLL.Services.Classes
                 memberVM.Add(memberViewModel);
             }
             return memberVM;
+        }
+
+        
+        
+        public async Task<MemberViewModel?> GetMemberDetailsByIdAsync(int memberId, CancellationToken ct = default)
+        {
+            // get member by id 
+            var member = await _memberRepo.GetByIdAsync(memberId, ct);
+            if (member == null) return null;
+            // table = member
+            // return member details to view model
+            var model = new MemberViewModel()
+            {
+                Photo = member.Photo,
+                Name = member.Name,
+                Email = member.Email,
+                Phone = member.Phone,
+                Gender = member.Gender.ToString(),
+                DateOfBirth = member.DateOfBirth.ToShortDateString(),
+                Address = $"{member.Address.BuildingNumber} - {member.Address.Street} - {member.Address.City}",
+                // planName - membershipStart and End                
+            };
+            // Check if member has active membership = Plan  or not
+            var ActiveMembership = await _membershipRepo.FirstOrDefaultAsync(X => X.MemberId == memberId && X.EndDate > DateTime.Now);
+            if (ActiveMembership is not null)
+            {
+                // plan name
+                var ActivePlan = await _planRepo.GetByIdAsync(ActiveMembership.PlanId , ct);
+                model.PlanName = ActivePlan?.Name;
+                model.MembershipStartDate = ActiveMembership.CreatedAt.ToString();
+                model.MembershipEndDate = ActiveMembership.EndDate.ToString();
+            }
+            return model;
         }
     }
 }

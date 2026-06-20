@@ -23,6 +23,8 @@ namespace GymManagement.DAL.Repositories.Interfaces
 
 
         Task<bool> AnyAsync(Expression<Func<TEntity , bool>> predict , CancellationToken ct = default);
-        
+
+        Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predict, bool tracking = false , CancellationToken ct = default);
+
     }
 }

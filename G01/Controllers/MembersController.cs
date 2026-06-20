@@ -26,6 +26,17 @@ namespace G01.PL.Controllers
         }
 
         // Get :: BaseUrl/Members/Details/{Id} => view details of a specific member
+        public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
+        {
+            // service => GetMemberDetailsById
+            var member = await _memService.GetMemberDetailsByIdAsync(id, ct);
+            
+            if (member == null)
+            {
+                TempData["ErrorMessage"] = "Member not found.";
+            }
+            return View(member);
+        }
 
 
         // Get :: BaseUrl/Members/HealthReacordDetails/{Id} => get data of a specific member with health record
