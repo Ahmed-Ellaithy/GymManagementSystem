@@ -12,7 +12,7 @@ namespace G01.Models
         public bool IsActive { get; set; }
 
         #region Relationships
-        public ICollection<Membership> Membership { get; set; }
+        public ICollection<Membership> PlanMembers { get; set; }
         #endregion
     }
 }

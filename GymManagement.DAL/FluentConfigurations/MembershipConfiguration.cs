@@ -19,7 +19,15 @@ namespace GymManagement.DAL.FluentConfigurations
                 .HasColumnName("StartDate")
                 .HasDefaultValueSql("GETDATE()");
 
+            builder.HasOne(m => m.Plan)
+                          .WithMany(p => p.PlanMembers)
+                          .HasForeignKey(m => m.PlanId)
+                          .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(m => m.Member)
+                   .WithMany(me => me.MemberPlans)
+                   .HasForeignKey(m => m.MemberId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
 
         }

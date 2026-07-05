@@ -1,135 +1,141 @@
-﻿using GymManagement.BLL.Services.Interfaces;
+﻿using GymManagement.BLL.Services.AttachmentService;
+using GymManagement.BLL.Services.Interfaces;
 using GymManagement.BLL.ViewModels.MemberViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace G01.PL.Controllers
 {
+    [Authorize(Roles = "SuperAdmin")]
     public class MembersController : Controller
     {
-        // members service
-        private readonly IMemberService _memService;
-        public MembersController(IMemberService memService)
+
+        private readonly IMemberService _memberService;
+        private readonly IAttachmentService _attachmentService;
+
+        public MembersController(IMemberService memberService, IAttachmentService attachmentService)
         {
-            _memService = memService;
+            _memberService = memberService;
+            _attachmentService = attachmentService;
         }
 
 
-
-        #region Get Members
-        // Get :: BaseUrl/Members/Index => list all members
         public async Task<IActionResult> Index(CancellationToken ct)
-        {
-            var members = await _memService.GetAllAsync(ct);
-            // service => GetAllMembers
-            return View(members);
-        }
-
-        // Get :: BaseUrl/Members/Details/{Id} => view details of a specific member
-        public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
-        {
-            // service => GetMemberDetailsById
-            var member = await _memService.GetMemberDetailsByIdAsync(id, ct);
-            
-            if (member == null)
-            {
-                TempData["ErrorMessage"] = "Member not found.";
-            }
-            return View(member);
-        }
+           => View(await _memberService.GetAllMembersAsync(ct));
 
 
-        // Get :: BaseUrl/Members/HealthReacordDetails/{Id} => get data of a specific member with health record
-        public async Task<IActionResult> HealthRecordDetails(int id , CancellationToken ct) 
-        { 
-            var record = await _memService.GetMemberHealthRecord(id, ct);
-            if(record == null)
-            {
-                TempData["ErrorMessage"] = "No Healt Record Found !";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(record);
-        }
-        #endregion
 
-        #region Create Members
-        // Get :: BaseUrl/Members/Create => show empty form
+
+
+
         [HttpGet]
-        public IActionResult Create()
-            => View();
+        public IActionResult Create() => View();
 
-        // Post :: BaseUrl/Members/Create/{member} => submit form
-        // CreateMember
         [HttpPost]
         public async Task<IActionResult> CreateMember(CreateMemberViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid) return View(nameof(Create), model);
-            
-            var result = await _memService.CreateMemberAsync(model, ct);
 
-            if(result)
+            var result = await _memberService.CreateMemberAsync(model, ct);
+            if (result.Success)
                 TempData["SuccessMessage"] = "Member created successfully.";
             else
-                TempData["ErrorMessage"] = "Failed to create member. Please try again.";
+                TempData["ErrorMessage"] = result.Error;
 
             return RedirectToAction(nameof(Index));
         }
-        #endregion
 
-        #region Edit
-        // Get :: BaseUrl/Members/Edit/{id} => show edit form
-        [HttpGet]
-        public async Task<IActionResult> EditMember(int id , CancellationToken ct) 
+
+
+
+        public async Task<IActionResult> Picture(int id)
         {
-            var member = await _memService.GetMemberToUpdateAsync(id, ct);
-            if(member == null) 
+            var member = await _memberService.GetMemberDetailsAsync(id);
+            if (member is null || string.IsNullOrEmpty(member.Photo))
+                return NotFound();
+
+
+            var result = _attachmentService.GetFile(member.Photo, "MembersPictures");
+            if (result is null) return NotFound();
+
+            return File(result.Value.Stream, result.Value.ContentType);
+        }
+        [HttpGet]
+        public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsAsync(id, ct);
+            if (member is null)
             {
-                TempData["ErrorMessage"] = "Member Not Found !";
+                TempData["ErrorMessage"] = "Member not found.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(member);
+        }
+        [HttpGet]
+        public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
+        {
+            var record = await _memberService.GetMemberHealthRecordAsync(id, ct);
+            if (record is null)
+            {
+                TempData["ErrorMessage"] = "Health record not found.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(record);
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> MemberEdit(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberToUpdateAsync(id, ct);
+            if (member is null)
+            {
+                TempData["ErrorMessage"] = "Member not found.";
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
         }
 
-        // Post :: BaseUrl/Members/Edit/{member} => submit edit form
         [HttpPost]
-        public async Task<IActionResult> EditMember([FromRoute] int id , MemberToUpdateViewModel model, CancellationToken ct) 
+        public async Task<IActionResult> MemberEdit(int id, MemberToUpdateViewModel model, CancellationToken ct)
         {
-            // check model state 
             if (!ModelState.IsValid) return View(model);
-            var result = await _memService.UpdateMemberAsync(id, model, ct);
-            if (result)
-                TempData["SucsessMessage"] = "Member Updated Successfully";
-            else
-                TempData["ErrorMessage"] = "Failed To Update Member";
-            return RedirectToAction(nameof(Index));
-        }
-        #endregion
 
-        #region Delete
-        // Get BaseUrl/Members/Delete/{id} => show validation page
-        public async Task<IActionResult> Delete(int id, CancellationToken ct) 
-        {
-            var member = _memService.GetMemberDetailsByIdAsync(id,ct);
-
-            if (member is null) 
+            var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
+            if (result.Success)
             {
-                TempData["ErrorMessage"] = "Member Not Found";
+                TempData["SuccessMessage"] = "Member updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["ErrorMessage"] = result.Error;
+            return View(model);
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsAsync(id, ct);
+            if (member is null)
+            {
+                TempData["ErrorMessage"] = "Member not found.";
                 return RedirectToAction(nameof(Index));
             }
             return View();
         }
-        [HttpPost]
-        public async Task<IActionResult> DeleteConfirmed([FromRoute] int id , CancellationToken ct)
-        {
-            var result = await _memService.DeleteMemberAsync(id, ct);
-            if (result)
-                TempData["SuccessMessage"] = "Member Deleted Successfully";
-            else
-                TempData["ErrorMessage"] = "Failed To Delete Member";
 
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed(int id, CancellationToken ct)
+        {
+            var result = await _memberService.RemoveMemberAsync(id, ct);
+            TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] =
+                result.Success ? "Member deleted successfully." : result.Error;
             return RedirectToAction(nameof(Index));
         }
-        #endregion
 
     }
 }

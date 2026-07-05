@@ -10,19 +10,15 @@ namespace GymManagement.BLL.ViewModels.MemberViewModels
     {
         public int Id { get; set; }
         public string? Photo { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string Gender { get; set; }
-
-
-
-        // member details
-        public string? DateOfBirth { get; set; }
-        public string? Address { get; set; }
-        public string? PlanName { get; set; }
-        public string? MembershipStartDate { get; set; }
-        public string? MembershipEndDate { get; set; }
+        public string Name { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string Phone { get; set; } = default!;
+        public string Gender { get; set; } = default!;
+        public string DateOfBirth { get; set; } = default!;
+        public string Address { get; set; } = default!;
+        public string? PlanName { get; set; } = default!;
+        public string? MembershipStartDate { get; set; } = default!;
+        public string? MembershipEndDate { get; set; } = default!;
 
     }
 }

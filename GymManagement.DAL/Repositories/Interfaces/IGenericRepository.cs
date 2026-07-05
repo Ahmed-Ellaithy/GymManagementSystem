@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GymManagement.DAL.Repositories.Interfaces
 {
-    public interface IGenericRepository<TEntity> where TEntity : BaseEntity, new()
+    public interface IGenericRepository<TEntity> where TEntity : BaseEntity
     {
         // Get by id
         Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default);
@@ -16,15 +16,15 @@ namespace GymManagement.DAL.Repositories.Interfaces
         void AddAsync(TEntity entity);
         // Update
         void UpdateAsync(TEntity entity);
-        // Delete
+        // Delete 
         void DeleteAsync(TEntity entity);
         // Get all
-        Task<IEnumerable<TEntity>> GetAllAsync(bool tracking = false, CancellationToken ct = default);
+        Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? predicate = null, bool tracking = false, CancellationToken ct = default);
 
 
-        Task<bool> AnyAsync(Expression<Func<TEntity , bool>> predict , CancellationToken ct = default);
-
-        Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predict, bool tracking = false , CancellationToken ct = default);
+        Task<bool> AnyAsync(Expression<Func<TEntity , bool>> predicate, CancellationToken ct = default);
+        Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken ct = default);
+        Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool tracking = false, CancellationToken ct = default);
 
     }
 }

@@ -15,6 +15,14 @@ namespace GymManagement.DAL.FluentConfigurations
         {
             builder.Ignore(X => X.Id);
 
+            builder.HasOne(X => X.Session)
+                   .WithMany(X => X.SessionMember)
+                   .HasForeignKey(X => X.SessionId);
+
+            builder.HasOne(X => X.Member)
+                   .WithMany(X => X.MemberSession)
+                   .HasForeignKey(X => X.MemberId);
+
             builder.HasKey(X => new { X.SessionId , X.MemberId });    //composite PK
 
             builder.Property(X=>X.CreatedAt)

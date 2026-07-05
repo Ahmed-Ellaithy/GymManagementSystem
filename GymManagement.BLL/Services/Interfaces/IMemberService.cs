@@ -1,4 +1,5 @@
-﻿using GymManagement.BLL.ViewModels.MemberViewModels;
+﻿using GymManagement.BLL.Common;
+using GymManagement.BLL.ViewModels.MemberViewModels;
 using GymManagement.DAL.Models;
 using System;
 using System.Collections.Generic;
@@ -10,23 +11,13 @@ namespace GymManagement.BLL.Services.Interfaces
 {
     public interface IMemberService
     {
-        // Get all     
-        Task<IEnumerable<MemberViewModel>> GetAllAsync(CancellationToken ct = default);
 
-        // Create member
-        Task<bool> CreateMemberAsync( CreateMemberViewModel member, CancellationToken ct = default);
-
-        // Get member Details 
-        Task<MemberViewModel?> GetMemberDetailsByIdAsync(int memberId, CancellationToken ct = default);
-
-        // Get member with health record details
-        Task<HealthRecordViewModel> GetMemberHealthRecord(int memberId, CancellationToken ct = default);
-        // Get member to update
-        Task<MemberToUpdateViewModel> GetMemberToUpdateAsync(int memberId, CancellationToken ct = default);
-        // Update Member
-        Task<bool> UpdateMemberAsync(int id , MemberToUpdateViewModel model, CancellationToken ct = default);
-
-        // Delete Member
-        Task<bool> DeleteMemberAsync(int memberId, CancellationToken ct = default);
+        Task<Result> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default);
+        Task<Result> UpdateMemberDetailsAsync(int id, MemberToUpdateViewModel model, CancellationToken ct = default);
+        Task<Result> RemoveMemberAsync(int memberId, CancellationToken ct = default);
+        Task<IEnumerable<MemberViewModel>> GetAllMembersAsync(CancellationToken ct = default);
+        Task<MemberViewModel?> GetMemberDetailsAsync(int memberId, CancellationToken ct = default);
+        Task<HealthRecordViewModel?> GetMemberHealthRecordAsync(int memberId, CancellationToken ct = default);
+        Task<MemberToUpdateViewModel?> GetMemberToUpdateAsync(int memberId, CancellationToken ct = default);
     }
 }
