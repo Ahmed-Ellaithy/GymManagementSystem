@@ -1,40 +1,78 @@
 ﻿using G01.Context;
+using G01.Models;
+using GymManagement.BLL.Services.Interfaces;
+using GymManagement.BLL.ViewModels.PlanViewModels;
 using GymManagement.DAL.Repositories.Classes;
 using GymManagement.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace G01.Controllers
 {
+    [Authorize]
     public class PlanController : Controller
     {
+        private readonly IPlanService _planService;
 
-        private readonly IPlanRepository _planRepository ;
-        public PlanController(IPlanRepository planRepository)
+        public PlanController(IPlanService planService)
         {
-            _planRepository = planRepository;
-
+            _planService = planService;
         }
-
-        // GET :: BaseUrl/Plan/Index
 
         public async Task<IActionResult> Index(CancellationToken ct)
+           => View(await _planService.GetAllPlansAsync(ct));
+
+
+        
+        [HttpGet]
+        public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
-            var plans = await _planRepository.GetAllAsync(ct : ct);
-            return View(plans);
+            var plan = await _planService.GetPlanByIdAsync(id, ct);
+            if (plan is null)
+            {
+                TempData["ErrorMessage"] = "Plan not found.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(plan);
         }
 
 
-
-        // GET :: BaseUrl/Plan/Details/{Id}
-        public async Task<IActionResult> Details([FromRoute] int id , CancellationToken ct )
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, CancellationToken ct)
         {
-            var plan = await _planRepository.GetByIdAsync(id,ct);
-            if (plan == null)
+            var plan = await _planService.GetPlanToUpdateAsync(id, ct);
+            if (plan is null)
+            {
+                TempData["ErrorMessage"] = "Plan cannot be edited (not found, inactive, or has active memberships).";
                 return RedirectToAction(nameof(Index));
-
+            }
             return View(plan);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, UpdatePlanViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await _planService.UpdatePlanAsync(id, model, ct);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "Plan updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            TempData["ErrorMessage"] = result.Error;
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Activate(int id, CancellationToken ct)
+        {
+            var result = await _planService.ToggleActivationAsync(id, ct);
+            TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] =
+                result.Success ? "Plan status changed." : result.Error;
+            return RedirectToAction(nameof(Index));
         }
     }
 }

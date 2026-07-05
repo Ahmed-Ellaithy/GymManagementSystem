@@ -16,7 +16,7 @@ namespace GymManagement.DAL.FluentConfigurations
         {
             builder.Property(x => x.CreatedAt)
                 .HasColumnName("HireDate")
-                .HasDefaultValue("GETDATE()");
+                .HasDefaultValueSql("GETDATE()");
 
 
             // importat .. call the base class's configure method to apply the configurations defined in the base class

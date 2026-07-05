@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +22,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GymManagement.BLL\GymManagement.BLL.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="MembersPictures\" />
   </ItemGroup>
 
 </Project>

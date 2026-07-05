@@ -18,7 +18,7 @@ namespace GymManagement.DAL.FluentConfigurations
                 .HasMaxLength(30);
 
             builder.Property(x => x.CreatedAt)
-                .HasDefaultValue("GETDATE()");
+                .HasDefaultValueSql("GETDATE()");
 
 
 

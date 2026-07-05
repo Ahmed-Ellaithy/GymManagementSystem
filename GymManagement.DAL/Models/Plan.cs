@@ -10,6 +10,9 @@ namespace G01.Models
         public decimal Price { get; set; }
         public int DurationDays { get; set; }
         public bool IsActive { get; set; }
-       
+
+        #region Relationships
+        public ICollection<Membership> PlanMembers { get; set; }
+        #endregion
     }
 }

@@ -15,8 +15,11 @@ namespace GymManagement.DAL.FluentConfigurations
         {
             builder.Property(x => x.CreatedAt)
                 .HasColumnName("JoinDate")
-                .HasDefaultValue("GETDATE()");
+                .HasDefaultValueSql("GETDATE()");
 
+            builder.HasOne(M => M.HealthRecord)
+                          .WithOne(HR => HR.Member)
+                          .HasForeignKey<HealthRecord>(M => M.MemberId);
 
             // importat .. call the base class's configure method to apply the configurations defined in the base class
             base.Configure(builder);
