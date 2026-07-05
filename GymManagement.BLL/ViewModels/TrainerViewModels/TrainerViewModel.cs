@@ -16,6 +16,6 @@ namespace GymManagement.BLL.ViewModels.TrainerViewModels
         public string DateOfBirth { get; set; } = default!;
         public string Gender { get; set; } = default!;
         public string Address { get; set; } = default!;
-        public string Specialties { get; set; } = default!;
+        public string Specialty { get; set; } = default!;
     }
 }

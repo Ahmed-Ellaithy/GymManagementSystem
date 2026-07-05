@@ -48,6 +48,6 @@ namespace GymManagement.BLL.ViewModels.TrainerViewModels
 
         [Required(ErrorMessage = "Specialty is Required")]
         [EnumDataType(typeof(Specialty))]
-        public Specialty Specialties { get; set; }
+        public Specialty Specialty { get; set; }
     }
 }
