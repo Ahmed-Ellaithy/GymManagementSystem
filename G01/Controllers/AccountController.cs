@@ -56,7 +56,12 @@ namespace G01.PL.Controllers
             return View(model);
         }
 
-
+        public async Task<IActionResult> Logout() 
+        {
+                await _signInManager.SignOutAsync();
+                return RedirectToAction(nameof(Login));
+        }
+        [HttpGet]
          public IActionResult AccessDenied() => View();
 
 
